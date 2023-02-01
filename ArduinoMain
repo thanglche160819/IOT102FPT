@@ -1,0 +1,129 @@
+// C++ code
+//
+/*
+  This program blinks pin 13 of the Arduino (the
+  built-in LED)
+*/
+#include <LiquidCrystal.h>
+#define bientro A0
+LiquidCrystal lcd_1(10,9,7,6,5,4);
+int h =12,m=30,s=45;
+int hset=12,mset=30,sset=45;
+
+
+int mode = 4; 
+void setup()
+{
+  pinMode(13, OUTPUT); 
+  pinMode(12, OUTPUT); 
+  pinMode(11, OUTPUT); 
+  
+  pinMode(3, INPUT_PULLUP); 
+  Serial.begin(9600); 
+  lcd_1.begin(16, 2); 
+  
+  /*
+  lcd_1.setCursor(0,0); 
+  lcd_1.print("Time: 00:00:00"); 
+  lcd_1.setCursor(0,1); 
+  lcd_1.print("Set: 0:0:0");
+  */
+}
+
+void loop(){
+ int x = digitalRead(3); 
+ int y = digitalRead(2); 
+  
+  int ADC_bientro = analogRead(bientro);
+  
+  s++;
+  
+  
+  if(x==0){
+    mode = mode + 1; 
+    if(mode>=4) mode = 0; 
+    delay(250); 
+  }
+  if(mode == 1){
+    lcd_1.setCursor(0,0); 
+    lcd_1.print("Set Time:          ");
+    lcd_1.setCursor(0,1); 
+    lcd_1.setCursor(0,1);lcd_1.print(hset);
+    lcd_1.print("                   ");
+    
+    
+    digitalWrite(13, HIGH); 
+    digitalWrite(12, LOW); 
+    digitalWrite(11, LOW);
+    delay(100); 
+    digitalWrite(13, LOW); 
+    digitalWrite(12, HIGH); 
+    digitalWrite(11, LOW);
+    delay(100); 
+    digitalWrite(13, LOW); 
+    digitalWrite(12, LOW); 
+    digitalWrite(11, HIGH);
+    delay(100); 
+  }
+  if(mode == 2){
+    lcd_1.setCursor(0,0); 
+    lcd_1.print("Mode 2");
+    digitalWrite(13, HIGH); 
+    digitalWrite(12, HIGH); 
+    digitalWrite(11, HIGH);
+    delay(100); 
+    digitalWrite(13, LOW); 
+    digitalWrite(12, LOW); 
+    digitalWrite(11, LOW);
+    delay(100); 
+  }
+  if(mode == 3){
+    lcd_1.setCursor(0,0); 
+    lcd_1.print("Mode 3");
+    digitalWrite(13, HIGH); 
+    digitalWrite(12, LOW); 
+    digitalWrite(11, LOW);
+    delay(100); 
+    digitalWrite(13, LOW); 
+    digitalWrite(12, LOW); 
+    digitalWrite(11, HIGH);
+    delay(100); 
+  }
+  if(mode == 0){
+    lcd_1.setCursor(0,0); 
+    lcd_1.print("Time: ");
+    	lcd_1.setCursor(6,0);lcd_1.print(h);
+    	lcd_1.setCursor(8,0);lcd_1.print(":");
+    	lcd_1.setCursor(9,0);lcd_1.print(m);
+    	lcd_1.setCursor(11,0);lcd_1.print(":");
+    	lcd_1.setCursor(12,0);lcd_1.print(s);
+    
+    lcd_1.setCursor(0,1);
+    lcd_1.print("Set");
+    	lcd_1.setCursor(6,1);lcd_1.print(hset);
+    	lcd_1.setCursor(8,1);lcd_1.print(":");
+    	lcd_1.setCursor(9,1);lcd_1.print(mset);
+    	lcd_1.setCursor(11,1);lcd_1.print(":");
+    	lcd_1.setCursor(12,1);lcd_1.print(sset);
+    
+   
+    
+    digitalWrite(13, LOW); 
+    digitalWrite(12, LOW); 
+    digitalWrite(11, LOW);
+  }
+  
+   if(mode == 4){
+    	lcd_1.setCursor(0,0);lcd_1.print("ADC0:           "); 
+    	lcd_1.setCursor(0,1);lcd_1.print("ADC1:           ");
+      
+      	lcd_1.setCursor(6,0);lcd_1.print(ADC_bientro);
+     	
+     	float vol = (ADC_bientro*5.0)/1023.0;
+   		lcd_1.setCursor(11,0);lcd_1.print(vol);lcd_1.print('v');
+     
+      	Serial.println(ADC_bientro);
+     
+     	delay(20);
+    }
+}
