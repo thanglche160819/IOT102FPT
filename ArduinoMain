@@ -41,7 +41,7 @@ void loop(){
   
   if(x==0){
     mode = mode + 1; 
-    if(mode>=4) mode = 0; 
+    if(mode>=5) mode = 0; 
     delay(250); 
   }
   if(mode == 1){
@@ -123,7 +123,9 @@ void loop(){
    		lcd_1.setCursor(11,0);lcd_1.print(vol);lcd_1.print('v');
      
       	Serial.println(ADC_bientro);
-     
+     	
+     	analogWrite(11,ADC_bientro);
+     	
      	delay(20);
     }
 }
