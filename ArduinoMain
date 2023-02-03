@@ -7,6 +7,7 @@
 #include <LiquidCrystal.h>
 #define bientro A0
 #define quangtro A1
+
 LiquidCrystal lcd_1(10,9,7,6,5,4);
 int h =12,m=30,s=45;
 int hset=12,mset=30,sset=45;
@@ -20,6 +21,7 @@ void setup()
   pinMode(11, OUTPUT); 
   
   pinMode(3, INPUT_PULLUP); 
+  pinMode(8, OUTPUT); 
   Serial.begin(9600); 
   lcd_1.begin(16, 2); 
   
@@ -36,14 +38,13 @@ void loop(){
  int y = digitalRead(2); 
   
   int ADC_bientro = analogRead(bientro);
-  int ADC_quangtro = analogRead(quangtro);
-  
+  int ADC1_quangtro = analogRead(quangtro);
   s++;
   
   
   if(x==0){
     mode = mode + 1; 
-    if(mode>=5) mode = 0; 
+    if(mode>=4) mode = 0; 
     delay(250); 
   }
   if(mode == 1){
@@ -94,19 +95,19 @@ void loop(){
   if(mode == 0){
     lcd_1.setCursor(0,0); 
     lcd_1.print("Time: ");
-    	lcd_1.setCursor(6,0);lcd_1.print(h);
-    	lcd_1.setCursor(8,0);lcd_1.print(":");
-    	lcd_1.setCursor(9,0);lcd_1.print(m);
-    	lcd_1.setCursor(11,0);lcd_1.print(":");
-    	lcd_1.setCursor(12,0);lcd_1.print(s);
+      lcd_1.setCursor(6,0);lcd_1.print(h);
+      lcd_1.setCursor(8,0);lcd_1.print(":");
+      lcd_1.setCursor(9,0);lcd_1.print(m);
+      lcd_1.setCursor(11,0);lcd_1.print(":");
+      lcd_1.setCursor(12,0);lcd_1.print(s);
     
     lcd_1.setCursor(0,1);
     lcd_1.print("Set");
-    	lcd_1.setCursor(6,1);lcd_1.print(hset);
-    	lcd_1.setCursor(8,1);lcd_1.print(":");
-    	lcd_1.setCursor(9,1);lcd_1.print(mset);
-    	lcd_1.setCursor(11,1);lcd_1.print(":");
-    	lcd_1.setCursor(12,1);lcd_1.print(sset);
+      lcd_1.setCursor(6,1);lcd_1.print(hset);
+      lcd_1.setCursor(8,1);lcd_1.print(":");
+      lcd_1.setCursor(9,1);lcd_1.print(mset);
+      lcd_1.setCursor(11,1);lcd_1.print(":");
+      lcd_1.setCursor(12,1);lcd_1.print(sset);
     
    
     
@@ -116,20 +117,31 @@ void loop(){
   }
   
    if(mode == 4){
-    	lcd_1.setCursor(0,0);lcd_1.print("ADC0:           "); 
-    	lcd_1.setCursor(0,1);lcd_1.print("ADC1:           ");
+      lcd_1.setCursor(0,0);lcd_1.print("ADC0:           "); 
+      lcd_1.setCursor(0,1);lcd_1.print("ADC1:           ");
       
-      	lcd_1.setCursor(6,0);lcd_1.print(ADC_bientro);
-     	lcd_1.setCursor(6,1);lcd_1.print(ADC_quangtro);
-     	
-     	float vol = (ADC_bientro*5.0)/1023.0;
-     	
-   		lcd_1.setCursor(11,0);lcd_1.print(vol);lcd_1.print('v');
+        lcd_1.setCursor(6,0);lcd_1.print(ADC_bientro);
+        lcd_1.setCursor(6,1);lcd_1.print(ADC1_quangtro);
+      
+        float vol = (ADC_bientro*5.0)/1023.0; 
+        lcd_1.setCursor(11,0); lcd_1.print(vol); lcd_1.print("v"); 
      
-      	//Serial.println(ADC_bientro);
-     	
-     	//analogWrite(11,ADC_bientro);
-     	
-     	delay(1000);
+     //   Serial.println(ADC_bientro);
+        Serial.println(ADC1_quangtro);
+    
+    /*    analogWrite(11, ADC_bientro/4); */ 
+       
+          digitalWrite(11, HIGH);  
+
+ 
+          if(ADC1_quangtro < 820){
+            digitalWrite(8, HIGH);
+            delay(100);
+            digitalWrite(8,LOW);
+            delay(100);
+          }else{
+            digitalWrite(8, LOW); 
+          }
+      delay(5);
     }
 }
