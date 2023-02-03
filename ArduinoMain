@@ -123,8 +123,8 @@ void loop(){
       //  lcd_1.setCursor(6,0);lcd_1.print(ADC_bientro);
         lcd_1.setCursor(6,1);lcd_1.print(ADC1_quangtro);
       
-        float vol = (ADC_bientro*5.0)/1023.0; 
-        lcd_1.setCursor(11,0); lcd_1.print(vol); lcd_1.print("v"); 
+       // float vol = (ADC_bientro*5.0)/1023.0; 
+       // lcd_1.setCursor(11,0); lcd_1.print(vol); lcd_1.print("v"); 
      
      //   Serial.println(ADC_bientro);
         Serial.println(ADC1_quangtro);
