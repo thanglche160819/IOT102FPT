@@ -135,19 +135,19 @@ void loop(){
 
  
           if(ADC1_quangtro < 150 && ADC1_quangtro > 110){
-            lcd_1.setCursor(0,0);lcd_1.print("Nuoc loc");
+            lcd_1.setCursor(0,0);lcd_1.print("Nuoc loc     ");
             Serial.println("Nuoc loc");
           } else if (ADC1_quangtro < 460 && ADC1_quangtro > 440 ) {
-            lcd_1.setCursor(0,0);lcd_1.print("O Long");
+            lcd_1.setCursor(0,0);lcd_1.print("O Long     ");
             Serial.println("O Long");
           } else if (ADC1_quangtro < 520 && ADC1_quangtro > 465 ){
-            lcd_1.setCursor(0,0);lcd_1.print("Tra chanh");
+            lcd_1.setCursor(0,0);lcd_1.print("Tra chanh     ");
             Serial.println("Tra Chanh");
           } else if (ADC1_quangtro < 600 && ADC1_quangtro > 540 ){
-            lcd_1.setCursor(0,0);lcd_1.print("Bi dao");
+            lcd_1.setCursor(0,0);lcd_1.print("Bi dao     ");
             Serial.println("Bi dao");
           } else if (ADC1_quangtro < 680 && ADC1_quangtro > 620){
-            lcd_1.setCursor(0,0);lcd_1.print("Sua");
+            lcd_1.setCursor(0,0);lcd_1.print("Sua        ");
             Serial.println("Sua");
           }
       delay(5);
