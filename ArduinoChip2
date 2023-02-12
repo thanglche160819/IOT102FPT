@@ -9,7 +9,7 @@
   modified 8 Nov 2013  by Scott Fitzgerald
   http://www.arduino.cc/en/Tutorial/Sweep
 */
-
+/*
 #include <Servo.h>
 
 int pos = 0;
@@ -29,12 +29,376 @@ void loop()
     // tell servo to go to position in variable 'pos'
     servoDA.write(pos);
     // wait 15 ms for servo to reach the position
-    delay(15); // Wait for 15 millisecond(s)
+    delay(5); // Wait for 15 millisecond(s)
   }
   for (pos = 180; pos >= 0; pos -= 1) {
     // tell servo to go to position in variable 'pos'
     servoDA.write(pos);
     // wait 15 ms for servo to reach the position
-    delay(15); // Wait for 15 millisecond(s)
+    delay(5); // Wait for 15 millisecond(s)
   }
 }
+*/
+
+/*
+#include <Servo.h>
+
+Servo myservo;
+
+int potpin = 0;
+int val;
+
+void setup(){
+	myservo.attach(11);
+}
+
+
+void loop(){
+	val = analogRead(potpin);
+  	val = map(val, 0, 1023, 0, 180);
+  	myservo.write(val);
+  	delay(1);
+}
+
+*/
+
+/*
+#include <Servo.h>
+#define quangtro A1
+
+int pos = 0;
+
+Servo servoDA;
+
+void setup(){
+  servoDA.attach(11);
+  Serial.begin(9600);
+}
+
+void loop(){
+  int ADC_quangtro = analogRead(quangtro);
+  // sweep the servo from 0 to 180 degrees in steps
+  // of 1 degrees
+  Serial.println(ADC_quangtro);
+ 
+  if (ADC_quangtro >= 200){
+  for (pos = 90; pos <= 120; pos += 1) {
+    // tell servo to go to position in variable 'pos'
+    servoDA.write(pos);
+    // wait 15 ms for servo to reach the position
+    delay(8); // Wait for 15 millisecond(s)
+  }
+  for (pos = 120; pos >= 90; pos -= 1) {
+    // tell servo to go to position in variable 'pos'
+    servoDA.write(pos);
+    // wait 15 ms for servo to reach the position
+    delay(8); // Wait for 15 millisecond(s)
+  }
+  }
+}
+
+*/
+
+// C++ code
+//
+/*
+  Sweep
+
+  by BARRAGAN <http://barraganstudio.com>
+  This example code is in the public domain.
+
+  modified 8 Nov 2013  by Scott Fitzgerald
+  http://www.arduino.cc/en/Tutorial/Sweep
+*/
+
+/*
+#include <Servo.h>
+
+int pos = 0;
+
+Servo servo_9;
+
+void setup()
+{
+  servo_9.attach(11, 500, 2500);
+}
+
+void loop()
+{
+  // sweep the servo from 0 to 180 degrees in steps
+  // of 1 degrees
+  for (pos = 0; pos <= 180; pos += 1) {
+    // tell servo to go to position in variable 'pos'
+    servo_9.write(pos);
+    // wait 15 ms for servo to reach the position
+    delay(15); // Wait for 15 millisecond(s)
+  }
+  for (pos = 180; pos >= 0; pos -= 1) {
+    // tell servo to go to position in variable 'pos'
+    servo_9.write(pos);
+    // wait 15 ms for servo to reach the position
+    delay(15); // Wait for 15 millisecond(s)
+  }
+  */
+  
+/*
+  #include <Servo.h>
+  
+  Servo myservo;
+  int potpin = 0; 
+  int val; 
+  
+  void setup(){
+    myservo.attach(11); 
+  }
+  
+  void loop(){
+	val = analogRead(potpin);
+  	val = map(val, 0, 1023, 0, 180);
+  	myservo.write(val);
+  	delay(1);
+}
+*/
+  
+  
+//}
+
+//===== ma tran phim  ============
+
+//khai bao thu vien
+  #include <Servo.h>
+  
+  Servo myservo;
+  int pos = 0; 
+
+//dinh nghia chan cong
+#define row1 2
+#define row2 3
+#define row3 4
+#define row4 5
+
+#define col1 A5
+#define col2 A4
+#define col3 A3
+#define col4 A2
+
+#define ledA 6
+#define ledB 7
+#define ledC 8
+#define ledD 9
+#define ledE 10
+
+#define ledF 12
+#define ledG 13
+
+//khai bao bien toan cuc
+
+int code_matrix = 0; 
+
+//cac chuong trinh con neu co
+
+// chuong trinh cai dat ban dau
+void setup(){
+  
+  pinMode(row1, OUTPUT); 
+  pinMode(row2, OUTPUT); 
+  pinMode(row3, OUTPUT); 
+  pinMode(row4, OUTPUT); 
+  
+  pinMode(col1, INPUT_PULLUP); 
+  pinMode(col2, INPUT_PULLUP); 
+  pinMode(col3, INPUT_PULLUP); 
+  pinMode(col4, INPUT_PULLUP); 
+  
+  pinMode(ledA, OUTPUT);
+  pinMode(ledB, OUTPUT);
+  pinMode(ledC, OUTPUT);
+  pinMode(ledD, OUTPUT);
+  pinMode(ledE, OUTPUT);
+  pinMode(ledF, OUTPUT);
+  pinMode(ledG, OUTPUT);
+  
+  myservo.attach(11);
+  Serial.begin(9600); 
+}
+// chuong trinh chinh
+void loop(){
+  
+  //b1: thu thap du lieu
+        //quet ma tran phim
+        //quet hang 1
+  digitalWrite(row1, 0); 
+  digitalWrite(row2, 1); 
+  digitalWrite(row2, 1); 
+  digitalWrite(row2, 1); 
+  
+  if(digitalRead(col1) == 0) code_matrix = 1; 
+  if(digitalRead(col2) == 0) code_matrix = 2; 
+  if(digitalRead(col3) == 0) code_matrix = 3;
+  if(digitalRead(col4) == 0) code_matrix = 'A'; 
+
+  digitalWrite(row1, 1); 
+  digitalWrite(row2, 0); 
+  digitalWrite(row3, 1); 
+  digitalWrite(row4, 1); 
+  
+  if(digitalRead(col1) == 0) code_matrix = 4; 
+  if(digitalRead(col2) == 0) code_matrix = 5; 
+  if(digitalRead(col3) == 0) code_matrix = 6;
+  if(digitalRead(col4) == 0) code_matrix = 'B'; 
+  
+  digitalWrite(row1, 1); 
+  digitalWrite(row2, 1); 
+  digitalWrite(row3, 0); 
+  digitalWrite(row4, 1); 
+  
+  if(digitalRead(col1) == 0) code_matrix = 7; 
+  if(digitalRead(col2) == 0) code_matrix = 8; 
+  if(digitalRead(col3) == 0) code_matrix = 9;
+  if(digitalRead(col4) == 0) code_matrix = 'C';
+  
+  digitalWrite(row1, 1); 
+  digitalWrite(row2, 1); 
+  digitalWrite(row3, 1); 
+  digitalWrite(row4, 0); 
+  
+  if(digitalRead(col1) == 0) code_matrix = '*'; 
+  if(digitalRead(col2) == 0) code_matrix = 0; 
+  if(digitalRead(col3) == 0) code_matrix = '#';
+  if(digitalRead(col4) == 0) code_matrix = 'D';
+  
+  Serial.print(code_matrix); 
+  delay(10); 
+  
+  //b2: xu ly tinh toan
+  if(code_matrix >= 0 & code_matrix <=9){
+    pos = code_matrix * 10; 
+  }
+  
+  //b3: dieu khien dau ra 
+  Serial.print(' '); 
+  Serial.println(pos); 
+  myservo.write(pos); 
+  
+  if ( code_matrix == 0){
+  	digitalWrite(ledA, 0);
+    digitalWrite(ledB, 0);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 0);
+    digitalWrite(ledE, 0);
+    digitalWrite(ledF, 0);
+    digitalWrite(ledG, 1);
+  }
+  
+  if ( code_matrix == 1){
+  	digitalWrite(ledA, 1);
+    digitalWrite(ledB, 0);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 1);
+    digitalWrite(ledE, 1);
+    digitalWrite(ledF, 1);
+    digitalWrite(ledG, 1);
+  }
+  
+  if ( code_matrix == 2 ){
+  	digitalWrite(ledA, 0);
+    digitalWrite(ledB, 0);
+    digitalWrite(ledC, 1);
+    digitalWrite(ledD, 0);
+    digitalWrite(ledE, 0);
+    digitalWrite(ledF, 1);
+    digitalWrite(ledG, 0);
+  }
+  
+  if ( code_matrix == 3 ){
+  	digitalWrite(ledA, 0);
+    digitalWrite(ledB, 0);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 0);
+    digitalWrite(ledE, 1);
+    digitalWrite(ledF, 1);
+    digitalWrite(ledG, 0);
+  }
+  
+  if ( code_matrix == 4 ){
+  	digitalWrite(ledA, 1);
+    digitalWrite(ledB, 0);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 1);
+    digitalWrite(ledE, 1);
+    digitalWrite(ledF, 0);
+    digitalWrite(ledG, 0);
+  }
+  
+  if ( code_matrix == 5 ){
+  	digitalWrite(ledA, 0);
+    digitalWrite(ledB, 1);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 0);
+    digitalWrite(ledE, 1);
+    digitalWrite(ledF, 0);
+    digitalWrite(ledG, 0);
+  }
+  
+  if ( code_matrix == 6 ){
+  	digitalWrite(ledA, 0);
+    digitalWrite(ledB, 1);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 0);
+    digitalWrite(ledE, 0);
+    digitalWrite(ledF, 0);
+    digitalWrite(ledG, 0);
+  }
+  
+  if ( code_matrix == 7 ){
+  	digitalWrite(ledA, 0);
+    digitalWrite(ledB, 0);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 1);
+    digitalWrite(ledE, 1);
+    digitalWrite(ledF, 1);
+    digitalWrite(ledG, 1);
+  }
+  
+  if ( code_matrix == 8 ){
+  	digitalWrite(ledA, 0);
+    digitalWrite(ledB, 0);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 0);
+    digitalWrite(ledE, 0);
+    digitalWrite(ledF, 0);
+    digitalWrite(ledG, 0);
+  }
+  
+  if ( code_matrix == 9 ){
+  	digitalWrite(ledA, 0);
+    digitalWrite(ledB, 0);
+    digitalWrite(ledC, 0);
+    digitalWrite(ledD, 0);
+    digitalWrite(ledE, 1);
+    digitalWrite(ledF, 0);
+    digitalWrite(ledG, 0);
+  }
+  
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
