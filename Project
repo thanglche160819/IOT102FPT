@@ -1,0 +1,479 @@
+//khai báo thư viện 
+#include <LiquidCrystal.h>
+#include <Servo.h>    
+#include<EEPROM.h>      
+
+// khai báo ma trận phím 4x4
+#define row1 13
+#define row2 12
+
+#define col1 A5
+#define col2 A4
+#define col3 A3
+#define col4 A2
+
+
+Servo myservo; 
+
+// khai báo cổng cảm biến ánh sáng
+#define cbAnhSang A0
+// khai báo cổng cảm biến nhiệt độ
+#define cbNhietDo A1
+// Khai báo cổng rc servo
+#define servo 6
+// Khai báo nóng lạnh (giả lập led màu đỏ) 
+#define ledNL 9
+// Khai báo điều hòa (giả lập led màu xanh lá)
+#define ledDH 8
+// Khai báo còi chống trộm
+#define coiBaoHieu 7
+// Khai nút giả lập chống trộm
+#define button 1
+
+// Thiết lập các chân của LCD với cổng nối Arduino R3
+LiquidCrystal lcd(11,10,5,4,3,2);
+
+// định nghĩa các biến cần dùng
+int hour = 18;
+int min = 59;
+int second =50 ;
+
+float cel;
+int anhSang = 0;
+//int defaultDH = 30; 
+//int defaultMoRem = 7; 
+//int defaultDongRem = 22; 
+//int defaultNL = 17; 
+
+int defaultDH = EEPROM.read(0); 
+int defaultMoRem = EEPROM.read(1); 
+int defaultDongRem = EEPROM.read(2); 
+int defaultNL = EEPROM.read(3); 
+
+
+int mode = 0;
+int state = 1;
+char inputKeyboard = 0;
+int runTime = 0;
+int coi = 0;
+unsigned long beforeTime = 0;
+unsigned long time; 
+
+void setup() {
+
+  myservo.attach(servo);
+
+  pinMode(ledNL,OUTPUT);
+  pinMode(ledDH,OUTPUT);
+  pinMode(coiBaoHieu,OUTPUT);
+ 
+  pinMode(row1,OUTPUT);
+  pinMode(row2,OUTPUT);
+  pinMode(col1,INPUT_PULLUP);
+  pinMode(col2,INPUT_PULLUP);
+  pinMode(col3,INPUT_PULLUP);
+  pinMode(col4,INPUT_PULLUP); 
+  
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+  
+}
+
+int UP(int up) {
+  unsigned long defaultTime = millis();
+  if (defaultTime - beforeTime >= 300) {
+    beforeTime = defaultTime;
+    up++;
+  }
+  return up;
+}
+
+int DOWN(int down) {
+  unsigned long defaultTime = millis();
+  if (defaultTime - beforeTime >= 300) {
+    beforeTime = defaultTime;
+    down--;
+  }
+  return down;
+}
+
+
+//Chuyển các biến thời gian gán mặc định ở đầu theo định dạng
+void formatTime()
+{
+  int time ;
+  time = second /60;
+  second %=60;
+  min += time;
+  time = min/60;
+  min%=60;
+  hour += time;
+  hour%=24;
+}
+
+
+void increaseTime()
+{
+  if((millis()/1000) > runTime)
+  {
+    int current = (millis()/1000) - runTime;
+    second+= current;
+    runTime += current;
+  } else if ((millis()/1000) < runTime) {
+    runTime = 0; 
+    int current = (millis()/1000) - runTime;
+    second+= current;
+    runTime += current;
+  }
+}
+
+
+// Hiển thị thời gian theo format 00:00:00
+String lcdFm(int x){
+  String s ="";
+    s = char(x%10+'0')+s;
+    x/=10;
+    s = char(x%10+'0')+s; 
+    return s;
+}
+
+// Hiển thị màn hình mặc định khi khởi chạy
+// Dòng 1 để hiển thị ánh sáng
+// Dòng 2 để hiển thị nhiệt độ
+void display(){  
+  int anhSang = analogRead(cbAnhSang);
+  float nhietDo = analogRead(cbNhietDo); 
+ 
+  float mv = (nhietDo/1023.0)*5000; 
+  float cel = mv/10;
+  
+  lcd.setCursor(0, 1);lcd.print("Nhiet Do: ");
+   lcd.print(cel);
+   lcd.setCursor(11,0);
+   lcd.print(" ");
+   lcd.setCursor(0, 0);
+   lcd.print("Anh Sang: ");
+   lcd.print(anhSang);
+  
+  if(cel >= defaultDH)
+  {
+    digitalWrite(ledDH,HIGH);
+  }
+  else{
+    digitalWrite(ledDH,LOW);
+  }  
+}
+
+// Hiển thị Menu
+/*
+  1. Thời gian thực.
+    2. Cài điều hòa.
+    3. Cài rèm cửa.
+    4. Cài nóng lạnh
+
+*/
+void displayMenu(int state){
+  if(state==1){
+    lcd.setCursor(0, 0);lcd.print("1.THOI GIAN THUC");
+    lcd.setCursor(0, 1);lcd.print("2.CAI DIEU HOA");
+  }
+  if(state==2){
+    lcd.setCursor(0, 0);lcd.print("3.CAI REM CUA");
+    lcd.setCursor(0, 1);lcd.print("4.CAI NONG LANH");
+  }
+}
+
+// Trường hợp 1: In thời gian thực
+void realTime() {
+   lcd.setCursor(0, 0);lcd.print("TIME: ");
+   lcd.setCursor(6, 0);lcd.print(lcdFm(hour));lcd.print(":");
+   lcd.setCursor(9, 0);lcd.print(lcdFm(min));lcd.print(":");
+   lcd.setCursor(12, 0);lcd.print(lcdFm(second));   
+}
+
+//Trường hợp 2: Cài đặt nhiệt độ trong phòng
+void changeDH() { 
+   lcd.setCursor(0,0);lcd.print("Cai dat nhiet do:");
+   lcd.setCursor(7,1);lcd.print(defaultDH);
+}
+
+// Trường hợp 3: Cài đặt rèm cửa đlcdFm(đóng) mở
+void changeServo(int state){ 
+  
+  if(state == 1){
+    lcd.setCursor(0,0);lcd.print("Set time mo: 1");
+    lcd.setCursor(0,1);lcd.print("Set time dong: 2");
+  }
+   if(state == 2)
+   {
+     lcd.setCursor(0, 0);lcd.print("Cai dat mo rem");
+     lcd.setCursor(7,1);lcd.print(defaultMoRem);
+     lcd.setCursor(14,0);lcd.print(" ");
+     lcd.setCursor(15,0);lcd.print(" ");
+   }
+   if(state == 3)
+   {
+     lcd.setCursor(0, 0);lcd.print("Cai dat dong rem");
+     lcd.setCursor(7,1);lcd.print(defaultDongRem);
+   }
+}
+ // Trường hợp 4: Cài đặt nóng lạnh
+void changeNL(){
+   lcd.setCursor(0, 0);lcd.print("Cai dat NongLanh");
+   lcd.setCursor(7,1);lcd.print(defaultNL);
+}
+
+char quetPhim(){
+  char key = 0 ;
+  digitalWrite(row1,0);
+  digitalWrite(row2,1);
+  if(digitalRead(col1)==0) key='1';
+  if(digitalRead(col2)==0) key='2';
+  if(digitalRead(col3)==0) key='3';
+  if(digitalRead(col4)==0) key='A';
+  
+  digitalWrite(row1,1);
+  digitalWrite(row2,0);
+  if(digitalRead(col1)==0) key='4';
+  if(digitalRead(col2)==0) key='5';
+  if(digitalRead(col3)==0) key='6';
+  if(digitalRead(col4)==0) key='B';
+  return key;
+} 
+
+// Để lấy ra phím người dùng bấm
+
+char input(){
+  if(inputKeyboard == quetPhim()) 
+  {
+   inputKeyboard = quetPhim();
+    return 0;
+  }
+  inputKeyboard = quetPhim();
+  return inputKeyboard;
+  
+}
+
+//TH1: bấm phím 5 chuyển sang chế độ menu
+//TH2: bấm phím B để back lại
+void exit(char c){
+   if( c == '5' || c == 'B' ) 
+   {
+     mode = 5;        
+     lcd.clear();
+     state = 1;
+   }
+}
+
+//Kiểm tra rèm cửa đóng hay mở
+void remCua(){
+ if(defaultMoRem <= hour && hour < defaultDongRem)
+ {
+    myservo.write(90);
+  } else {
+    myservo.write(0);
+  }
+}
+
+//Kiểm tra nóng lạnh bật hay tắt
+void nongLanh(){
+  if( hour == defaultNL && min == 0 && second == 0)
+  {
+   digitalWrite(ledNL,HIGH);
+  }
+  if( hour == defaultNL && min == 10 && second == 0)  {
+   digitalWrite(ledNL,LOW); 
+  }
+}
+
+//Kiểm tra còi
+void chongTrom(){ 
+  //Nếu mở cửa từ 22h đến 6h thì còi báo động 
+  if((hour >=22 || hour <6)  && digitalRead(button)==0)
+  {
+     digitalWrite(coiBaoHieu,HIGH);
+     coi = 1;
+  }
+  if(coi >0)
+  {
+    digitalWrite(coiBaoHieu,HIGH);
+  }
+  else{
+    digitalWrite(coiBaoHieu,LOW);
+ 
+  }
+}
+
+// Chọn menu. 1,2,3,4 tương ứng với từng cài đặt
+void menu(char selectMode){
+  if(selectMode=='1'){
+    lcd.clear();
+    mode=1;
+    state = 1;
+    
+  }
+  if(selectMode=='2'){
+    lcd.clear();
+    mode=2;
+    state = 1;
+  }
+  if(selectMode=='3'){
+    lcd.clear();
+    mode=3;
+    state = 1;
+    
+  }
+  if(selectMode=='4'){
+    lcd.clear();
+    mode=4;
+    state = 1;
+  }
+}
+
+
+// Lặp chương trình đến khi đâu reset
+void loop() {
+  increaseTime();
+  formatTime();
+
+  remCua();
+  nongLanh();
+  chongTrom();
+
+  switch(mode){
+    case(0):
+    {
+        display(); 
+        if(input() == '5') 
+        {
+          mode = 5;
+          state = 1;
+          lcd.clear();
+        }
+        break;
+    }
+    case(1)://Thời gian thực
+    {
+        char c = input();
+        realTime();
+        exit(c);
+      break;
+    }
+    case(2)://Cài đặt điều hòa
+    // Số 4 để giảm và số 6 để tăng nhiệt độ. 
+    // Khi quá nhiệt độ của cài đặt thì điều hòa sẽ được mở
+    {
+        char c = input();
+        changeDH();
+        if(quetPhim()=='6') 
+        {
+          defaultDH=UP(defaultDH);
+          if(defaultDH == 50) defaultDH = 16;
+        } else if (quetPhim()=='4'){
+          defaultDH=DOWN(defaultDH);
+          if(defaultDH == 15) defaultDH = 16;
+        }
+        EEPROM.write(0,defaultDH);
+        exit(c);
+      break;
+    }
+    case(3)://Cài đặt mở rèm
+    // Cài đặt thời gian mở/đóng rèm
+    // 1 để sửa thời gian mở rèm
+    // 2 đề sửa thời gian đóng rèm
+    // 4 và 6 lần lượt để giảm/tăng thời gian điều chỉnh
+    {
+        char c = input();
+        changeServo(state);
+        if(state ==1)
+        {
+          if(c == '1' ){
+            lcd.clear();
+            state = 2;     
+          }
+           if(c == '2'){
+             lcd.clear();
+            state = 3;
+           }
+        }
+      if(state == 2 && c =='6'){
+        defaultMoRem=UP(defaultMoRem);
+       
+        if(defaultMoRem==24)
+        {
+          defaultMoRem = 0;
+          lcd.clear();
+        }
+      }
+      if(state == 2 && c =='4'){
+        defaultMoRem=DOWN(defaultMoRem);
+       
+        if(defaultMoRem==-1)
+        {
+          defaultMoRem = 0;
+          lcd.clear();
+        }
+      }
+       if(state == 3 && c =='6')
+      {
+        defaultDongRem=UP(defaultDongRem);
+        if(defaultDongRem==24) 
+        {
+          defaultDongRem = 0;
+          lcd.clear();
+        }
+      }
+      if(state == 3 && c =='4')
+      {
+        defaultDongRem=DOWN(defaultDongRem);
+        if(defaultDongRem==-1) 
+        {
+          defaultDongRem = 0;
+          lcd.clear();
+        }
+      } 
+      EEPROM.write(1,defaultMoRem);
+      EEPROM.write(2,defaultDongRem);
+      exit(c);
+      break;
+    }
+    case(4)://Cài đặt bình nóng lạnh
+    // Cài đặt thời gian để mở bình nóng lạnh
+    // 6 tăng thời gian mở
+    {
+        char c = input();
+        changeNL();
+        if(quetPhim()=='6') 
+        {
+          defaultNL=UP(defaultNL);
+          if(defaultNL == 24) defaultNL = 0;
+          lcd.clear();
+        } 
+       EEPROM.write(3,defaultNL);
+       exit(c);
+      break;
+    }
+    case(5):
+    {
+      displayMenu(state); 
+      char c = input();
+      if(c=='A')
+      {
+      if(state==2){
+        state=1;
+        }else {
+          state=2;
+      }
+      lcd.clear();
+      }
+      menu(c);
+      if( c == '5' || c == 'B' ) 
+      {
+          mode = 0;        
+          lcd.clear();
+          break;
+      }
+        break;
+    }    
+  }
+}
